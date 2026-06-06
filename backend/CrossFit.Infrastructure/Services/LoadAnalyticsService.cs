@@ -1,6 +1,7 @@
 using CrossFit.Core.DTOs.Load;
 using CrossFit.Core.Entities;
 using CrossFit.Core.Entities.Load;
+using CrossFit.Core.Enums;
 using CrossFit.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -371,8 +372,8 @@ public class LoadAnalyticsService(AppDbContext db)
         snap.AvgRpe = validRpes.Any() ? Math.Round(validRpes.Average(), 1) : 0;
         snap.SessionCount = loads.Count;
         snap.TotalTonnageKg = Math.Round(loads.SelectMany(l => l.MovementVolumes).Sum(v => v.TonnageKg ?? 0), 1);
-        snap.CompletedSessions = sessions.Count(s => s.Status == Enums.SessionStatus.Completed);
-        snap.SkippedSessions = sessions.Count(s => s.Status == Enums.SessionStatus.Skipped);
+        snap.CompletedSessions = sessions.Count(s => s.Status == SessionStatus.Completed);
+        snap.SkippedSessions = sessions.Count(s => s.Status == SessionStatus.Skipped);
         snap.AcuteLoad7d = Math.Round(acute7, 1);
         snap.ChronicLoad28d = Math.Round(chronic28, 1);
         snap.AcwrRatio = chronic28 > 0 ? Math.Round(acute7 / chronic28, 2) : null;

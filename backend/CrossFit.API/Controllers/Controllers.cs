@@ -4,6 +4,8 @@ using CrossFit.Core.Enums;
 using CrossFit.Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using CrossFitProgram = CrossFit.Core.Entities.Program;
+
 
 namespace CrossFit.API.Controllers;
 
@@ -146,7 +148,7 @@ public class ProgramsController(
     [HttpPost, Authorize(Policy = "CoachOrAbove")]
     public async Task<ProgramDto> Create([FromBody] CreateProgramRequest req)
     {
-        var p = new Program
+        var p = new CrossFitProgram
         {
             OrganizationId = cu.OrganizationId,
             CreatedByUserId = cu.UserId,

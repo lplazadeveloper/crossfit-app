@@ -1,4 +1,5 @@
 using CrossFit.Core.Entities;
+using CrossFit.Core.Entities.Load;
 using Microsoft.EntityFrameworkCore;
 
 namespace CrossFit.Infrastructure.Data;
@@ -7,6 +8,7 @@ public class AppDbContext : DbContext
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
+    // ─── Entidades principales ────────────────────────────────────────────────
     public DbSet<Organization> Organizations => Set<Organization>();
     public DbSet<User> Users => Set<User>();
     public DbSet<UserCoachAssignment> CoachAssignments => Set<UserCoachAssignment>();
@@ -18,6 +20,15 @@ public class AppDbContext : DbContext
     public DbSet<AthleteOverride> AthleteOverrides => Set<AthleteOverride>();
     public DbSet<AthleteSession> AthleteSessions => Set<AthleteSession>();
     public DbSet<Feedback> Feedbacks => Set<Feedback>();
+
+    // ─── Entidades de carga ───────────────────────────────────────────────────
+    public DbSet<SessionLoad> SessionLoads => Set<SessionLoad>();
+    public DbSet<MovementVolume> MovementVolumes => Set<MovementVolume>();
+    public DbSet<AthleteRM> AthleteRMs => Set<AthleteRM>();
+    public DbSet<WeeklyLoadSnapshot> WeeklyLoadSnapshots => Set<WeeklyLoadSnapshot>();
+    public DbSet<Mesocycle> Mesocycles => Set<Mesocycle>();
+    public DbSet<TrainingBlock> TrainingBlocks => Set<TrainingBlock>();
+    public DbSet<BlockWeek> BlockWeeks => Set<BlockWeek>();
 
     protected override void OnModelCreating(ModelBuilder mb)
     {
@@ -173,6 +184,87 @@ public class AppDbContext : DbContext
             e.HasOne(x => x.Organization)
              .WithMany(x => x.WodTemplates)
              .HasForeignKey(x => x.OrganizationId)
+             .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ─── SessionLoad ──────────────────────────────────────────────────────
+        mb.Entity<SessionLoad>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.HasIndex(x => new { x.AthleteId, x.SessionDate });
+            e.HasOne(x => x.AthleteSession)
+             .WithMany()
+             .HasForeignKey(x => x.AthleteSessionId)
+             .OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(x => x.Athlete)
+             .WithMany()
+             .HasForeignKey(x => x.AthleteId)
+             .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // ─── MovementVolume ───────────────────────────────────────────────────
+        mb.Entity<MovementVolume>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.HasOne(x => x.SessionLoad)
+             .WithMany(x => x.MovementVolumes)
+             .HasForeignKey(x => x.SessionLoadId)
+             .OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(x => x.Athlete)
+             .WithMany()
+             .HasForeignKey(x => x.AthleteId)
+             .OnDelete(DeleteBehavior.Restrict);
+            e.Ignore(x => x.TonnageKg);
+        });
+
+        // ─── AthleteRM ────────────────────────────────────────────────────────
+        mb.Entity<AthleteRM>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.HasIndex(x => new { x.AthleteId, x.MovementName });
+            e.HasOne(x => x.Athlete)
+             .WithMany()
+             .HasForeignKey(x => x.AthleteId)
+             .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // ─── WeeklyLoadSnapshot ───────────────────────────────────────────────
+        mb.Entity<WeeklyLoadSnapshot>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.HasIndex(x => new { x.AthleteId, x.WeekStart }).IsUnique();
+            e.HasOne(x => x.Athlete)
+             .WithMany()
+             .HasForeignKey(x => x.AthleteId)
+             .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // ─── Mesocycle ────────────────────────────────────────────────────────
+        mb.Entity<Mesocycle>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Name).HasMaxLength(150).IsRequired();
+            e.HasQueryFilter(x => !x.IsDeleted);
+        });
+
+        // ─── TrainingBlock ────────────────────────────────────────────────────
+        mb.Entity<TrainingBlock>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Name).HasMaxLength(150).IsRequired();
+            e.HasOne(x => x.Mesocycle)
+             .WithMany(x => x.Blocks)
+             .HasForeignKey(x => x.MesocycleId)
+             .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ─── BlockWeek ────────────────────────────────────────────────────────
+        mb.Entity<BlockWeek>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.HasOne(x => x.Block)
+             .WithMany(x => x.Weeks)
+             .HasForeignKey(x => x.BlockId)
              .OnDelete(DeleteBehavior.Cascade);
         });
     }
