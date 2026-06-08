@@ -10,8 +10,9 @@ export const api = axios.create({
 // Attach JWT + org slug to every request
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('accessToken');
-  const org = localStorage.getItem('orgSlug');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
+  const stored = localStorage.getItem('crossfit-auth');
+  const parsed = stored ? JSON.parse(stored) : null;
+  const org = parsed?.state?.orgSlug ?? localStorage.getItem('orgSlug'); if (token) config.headers.Authorization = `Bearer ${token}`;
   if (org) config.headers['X-Organization'] = org;
   return config;
 });

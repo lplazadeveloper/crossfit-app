@@ -19,10 +19,14 @@ const qc = new QueryClient({
 });
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
-  const { user, setOrg } = useAuthStore();
+  const { user, orgSlug, setOrg } = useAuthStore();
+
   useEffect(() => {
-    if (user) orgApi.get().then(org => { setOrg(org); applyBranding(org); }).catch(() => {});
-  }, [user]);
+    if (user && orgSlug) {
+      orgApi.get().then(org => { setOrg(org); applyBranding(org); }).catch(() => {});
+    }
+  }, [user, orgSlug]);
+
   if (!user) return <Navigate to="/login" replace />;
   return <>{children}</>;
 }

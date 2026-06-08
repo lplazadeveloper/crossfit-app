@@ -73,9 +73,18 @@ public class AuthService(
 
     public async Task<AuthResponse> RefreshTokenAsync(string refreshToken)
     {
-        // Find user by refresh token (in production, use a separate table)
-        // For simplicity we search by token — in prod index this
-        throw new NotImplementedException("Search by refresh token in users table");
+        var user = await users.GetByRefreshTokenAsync(refreshToken)
+            ?? throw new UnauthorizedAccessException("Invalid refresh token");
+
+        if (user.RefreshTokenExpiry < DateTime.UtcNow)
+            throw new UnauthorizedAccessException("Refresh token expired");
+
+        var newRefreshToken = GenerateRefreshToken();
+        user.RefreshToken = newRefreshToken;
+        user.RefreshTokenExpiry = DateTime.UtcNow.AddDays(_refreshTokenDays);
+        await users.UpdateAsync(user);
+
+        return new AuthResponse(GenerateJwt(user), newRefreshToken, MapToDto(user));
     }
 
     public async Task RevokeTokenAsync(Guid userId)

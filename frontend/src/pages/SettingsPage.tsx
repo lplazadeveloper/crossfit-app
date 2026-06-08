@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
-import { orgApi, usersApi } from '../../api/services';
-import { useAuthStore, applyBranding } from '../../store/authStore';
-import { Card, Button, Input, Avatar, Badge } from '../../components/ui';
-import { UserRole } from '../../types';
+import { orgApi, usersApi } from '../api/services';
+import { useAuthStore, applyBranding } from '../store/authStore';
+import { Card, Button, Input, Avatar, Badge } from '../components/ui';
+import { UserRole } from '../types';
 
 export function SettingsPage() {
   const { user, isHeadCoach, setOrg } = useAuthStore();

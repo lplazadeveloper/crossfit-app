@@ -10,6 +10,7 @@ public interface IOrganizationRepository
     Task<Organization?> GetBySlugAsync(string slug);
     Task<Organization> CreateAsync(Organization org);
     Task<Organization> UpdateAsync(Organization org);
+
 }
 
 public interface IUserRepository
@@ -21,6 +22,7 @@ public interface IUserRepository
     Task<User> CreateAsync(User user);
     Task<User> UpdateAsync(User user);
     Task<List<User>> GetAthletesByCoachAsync(Guid coachId);
+    Task<User?> GetByRefreshTokenAsync(string refreshToken);
 }
 
 public interface IProgramRepository

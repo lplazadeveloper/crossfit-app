@@ -70,6 +70,10 @@ public class UserRepository(AppDbContext db) : IUserRepository
         await db.SaveChangesAsync();
         return user;
     }
+
+    public Task<User?> GetByRefreshTokenAsync(string refreshToken) =>
+    db.Users.Include(u => u.Organization)
+            .FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
 }
 
 // ─── Program ──────────────────────────────────────────────────────────────────

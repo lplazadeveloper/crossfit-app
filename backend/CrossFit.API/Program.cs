@@ -65,7 +65,7 @@ builder.Services.AddAuthorization(opts =>
 builder.Services.AddCors(opts =>
 {
     opts.AddPolicy("Frontend", p =>
-        p.WithOrigins(config["Cors:AllowedOrigins"]?.Split(',') ?? ["http://localhost:5173"])
+        p.SetIsOriginAllowed(_ => true)
          .AllowAnyHeader()
          .AllowAnyMethod()
          .AllowCredentials());
@@ -97,11 +97,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors("Frontend");
 app.UseIpRateLimiting();
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseMiddleware<TenantMiddleware>();
 app.UseHttpsRedirection();
-app.UseCors("Frontend");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
